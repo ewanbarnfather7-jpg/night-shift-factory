@@ -1,0 +1,88 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "UK T+1 Settlement Service (mock)", "version": "0.9.0" },
+  "servers": [{ "url": "http://127.0.0.1:4100" }],
+  "paths": {
+    "/health": { "get": { "responses": { "200": { "description": "Service up" } } } },
+    "/settlement-date": {
+      "get": {
+        "summary": "Derive settlement date and convention for a trade date",
+        "parameters": [{ "name": "tradeDate", "in": "query", "required": true, "schema": { "type": "string", "format": "date" } }],
+        "responses": {
+          "200": { "description": "Derived", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SettlementDate" } } } },
+          "400": { "description": "INVALID_TRADE_DATE" }
+        }
+      }
+    },
+    "/calendar/{year}": {
+      "get": {
+        "summary": "Holidays loaded for a year (reference data control RD-05)",
+        "parameters": [{ "name": "year", "in": "path", "required": true, "schema": { "type": "integer" } }],
+        "responses": { "200": { "description": "Loaded holidays" } }
+      }
+    },
+    "/trades": {
+      "post": {
+        "summary": "Capture a trade",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TradeInput" } } } },
+        "responses": { "201": { "description": "Captured" }, "400": { "description": "VALIDATION_FAILED with the list of failing fields" } }
+      }
+    },
+    "/trades/{id}": { "get": { "responses": { "200": { "description": "Trade" }, "404": { "description": "TRADE_NOT_FOUND" } } } },
+    "/trades/{id}/allocations": {
+      "post": {
+        "summary": "Allocate part of a trade to a fund. Must be received by allocationCutoff (23:59) on trade date, London time.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AllocationInput" } } } },
+        "responses": {
+          "201": { "description": "Allocated" },
+          "422": { "description": "LATE_ALLOCATION (names trade and fund, escalated) or OVER_ALLOCATION" }
+        }
+      }
+    },
+    "/trades/{id}/instructions": {
+      "post": {
+        "summary": "Create the settlement instruction",
+        "responses": { "201": { "description": "Instructed" }, "409": { "description": "DUPLICATE_INSTRUCTION" }, "422": { "description": "NOT_ALLOCATED" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SettlementDate": {
+        "type": "object",
+        "properties": {
+          "tradeDate": { "type": "string", "format": "date" },
+          "settlementDate": { "type": "string", "format": "date" },
+          "convention": { "type": "string", "enum": ["T+1", "T+2"] }
+        }
+      },
+      "TradeInput": {
+        "type": "object",
+        "required": ["isin", "side", "quantity", "price", "tradeDate"],
+        "properties": {
+          "isin": { "type": "string", "pattern": "^[A-Z]{2}[A-Z0-9]{9}[0-9]$" },
+          "side": { "type": "string", "enum": ["BUY", "SELL"] },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "price": { "type": "number", "exclusiveMinimum": 0 },
+          "tradeDate": { "type": "string", "format": "date" }
+        }
+      },
+      "AllocationInput": {
+        "type": "object",
+        "required": ["fund", "quantity", "ssiId", "receivedAt"],
+        "properties": {
+          "fund": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "ssiId": { "type": "string" },
+          "receivedAt": { "type": "string", "description": "London local time, YYYY-MM-DDTHH:MM" }
+        }
+      }
+    }
+  },
+  "x-nonFunctional": {
+    "GET /settlement-date": { "p95Ms": 8 },
+    "POST /trades": { "p95Ms": 10 },
+    "maxRequestBodyBytes": 1048576,
+    "errors": "Error responses never include stack traces or internal paths"
+  }
+}

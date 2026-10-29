@@ -1,0 +1,17 @@
+{
+  "name": "night-shift-factory",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Overnight multi-agent test factory for a UK T+1 settlement service: test, QA, security, performance and fix agents, a policy gate, a hash-chained evidence ledger and a morning pack for human sign-off.",
+  "license": "UNLICENSED",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "sut": "node sut/server.js",
+    "night-shift": "node factory/orchestrator.js",
+    "night-shift:observe": "node factory/orchestrator.js --no-fix",
+    "signoff": "node factory/signoff.js",
+    "verify-ledger": "node factory/verify-ledger.js",
+    "test": "node --test test/unit.test.js",
+    "test:e2e": "node --test test/shift.test.js"
+  }
+}

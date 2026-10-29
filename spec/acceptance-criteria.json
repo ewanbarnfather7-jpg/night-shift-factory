@@ -1,0 +1,31 @@
+{
+  "system": "UK T+1 settlement service",
+  "source": "UK T+1 Settlement - Test Scenario Pack (08/10/2026); UK T+1 Code of Conduct deadlines",
+  "cutoverTradeDate": "2027-10-11",
+  "deadlines": { "allocationCutoff": "23:59", "matchingCutoff": "06:00" },
+  "criteria": [
+    { "id": "SD-01", "area": "Settlement date", "type": "settlement-date", "title": "Mid-week baseline", "tradeDate": "2027-10-18", "expected": "2027-10-19", "convention": "T+1" },
+    { "id": "SD-02", "area": "Settlement date", "type": "settlement-date", "title": "Weekend roll", "tradeDate": "2027-10-15", "expected": "2027-10-18", "convention": "T+1" },
+    { "id": "SD-03", "area": "Settlement date", "type": "settlement-date", "title": "T+1 lands on Christmas Eve, a business day", "tradeDate": "2027-12-23", "expected": "2027-12-24", "convention": "T+1" },
+    { "id": "SD-04", "area": "Settlement date", "type": "settlement-date", "title": "Weekend plus two substitute holidays", "tradeDate": "2027-12-24", "expected": "2027-12-29", "convention": "T+1" },
+    { "id": "SD-05", "area": "Settlement date", "type": "settlement-date", "title": "New Year substitute holiday", "tradeDate": "2027-12-31", "expected": "2028-01-04", "convention": "T+1" },
+    { "id": "SD-06", "area": "Settlement date", "type": "settlement-date", "title": "Good Friday and Easter Monday", "tradeDate": "2028-04-13", "expected": "2028-04-18", "convention": "T+1" },
+    { "id": "SD-07", "area": "Settlement date", "type": "settlement-date", "title": "Spring bank holiday Monday", "tradeDate": "2028-05-26", "expected": "2028-05-30", "convention": "T+1" },
+    { "id": "SD-08", "area": "Settlement date", "type": "settlement-date", "title": "Summer bank holiday Monday", "tradeDate": "2028-08-25", "expected": "2028-08-29", "convention": "T+1" },
+    { "id": "CO-01", "area": "Cutover", "type": "settlement-date", "title": "Last T+2 trade date settles on the double settlement day", "tradeDate": "2027-10-08", "expected": "2027-10-12", "convention": "T+2" },
+    { "id": "CO-02", "area": "Cutover", "type": "settlement-date", "title": "First T+1 trade date settles on the double settlement day", "tradeDate": "2027-10-11", "expected": "2027-10-12", "convention": "T+1" },
+    { "id": "RD-05", "area": "Reference data", "type": "calendar-coverage", "title": "Loaded calendar contains the full published holiday set", "years": [2027, 2028] },
+    { "id": "TL-01", "area": "Lifecycle", "type": "allocation-deadline", "title": "Allocation at 18:00 on T is accepted", "tradeDate": "2027-10-18", "receivedAt": "2027-10-18T18:00", "expect": "ACCEPTED" },
+    { "id": "TL-02", "area": "Lifecycle", "type": "allocation-deadline", "title": "Allocation at 23:55 on T is accepted", "tradeDate": "2027-10-18", "receivedAt": "2027-10-18T23:55", "expect": "ACCEPTED" },
+    { "id": "TL-02B", "area": "Lifecycle", "type": "allocation-deadline", "title": "Boundary: allocation at exactly 23:59 on T is accepted", "tradeDate": "2027-10-18", "receivedAt": "2027-10-18T23:59", "expect": "ACCEPTED" },
+    { "id": "TL-03", "area": "Lifecycle", "type": "allocation-deadline", "title": "Allocation at 00:30 on T+1 is flagged late and escalated", "tradeDate": "2027-10-18", "receivedAt": "2027-10-19T00:30", "expect": "LATE_ALLOCATION" },
+    { "id": "TL-03B", "area": "Lifecycle", "type": "allocation-deadline", "title": "Boundary: allocation at 00:00 on T+1 is flagged late", "tradeDate": "2027-10-18", "receivedAt": "2027-10-19T00:00", "expect": "LATE_ALLOCATION" },
+    { "id": "TL-09", "area": "Lifecycle", "type": "validation", "title": "Trade missing a required field is rejected with a specific error, not defaulted", "body": { "isin": "GB0002634946", "side": "BUY", "quantity": 1000, "price": 4.215 }, "expectField": "tradeDate" },
+    { "id": "ST-12", "area": "Settlement", "type": "duplicate-instruction", "title": "Duplicate instruction for the same trade is rejected", "tradeDate": "2027-10-18" },
+    { "id": "SWEEP-01", "area": "Settlement date", "type": "sweep", "title": "Every business-day trade date in 2027-2028 matches the independent oracle", "from": "2027-01-01", "to": "2028-12-31" }
+  ],
+  "nfr": [
+    { "id": "NF-API-01", "title": "Settlement date lookup", "method": "GET", "path": "/settlement-date", "p95BudgetMs": 8, "samples": 100 },
+    { "id": "NF-API-02", "title": "Trade capture", "method": "POST", "path": "/trades", "p95BudgetMs": 10, "samples": 100 }
+  ]
+}

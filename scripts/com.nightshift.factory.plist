@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Runs the night shift at 01:07 Monday to Friday. Replace YOUR_USER, and set the node path to the output of `which node`. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.nightshift.factory</string>
+  <key>WorkingDirectory</key><string>/Users/YOUR_USER/projects/night-shift-factory</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>factory/orchestrator.js</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>1</integer><key>Minute</key><integer>7</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>1</integer><key>Minute</key><integer>7</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>1</integer><key>Minute</key><integer>7</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>1</integer><key>Minute</key><integer>7</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>1</integer><key>Minute</key><integer>7</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>/Users/YOUR_USER/projects/night-shift-factory/runs/launchd.log</string>
+  <key>StandardErrorPath</key><string>/Users/YOUR_USER/projects/night-shift-factory/runs/launchd.log</string>
+</dict>
+</plist>

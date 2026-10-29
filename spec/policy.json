@@ -1,0 +1,27 @@
+{
+  "description": "Policy gate for the night shift. The orchestrator enforces these rules; no agent can change them.",
+  "fixAgent": {
+    "allowedPaths": ["sut/lib/", "sut/server.js"],
+    "protectedPaths": ["spec/", "factory/", "test/", "sut/config.js"],
+    "maxFilesPerPR": 3,
+    "maxChangedLines": 120,
+    "maxAttempts": 2
+  },
+  "referenceData": {
+    "paths": ["sut/lib/calendar.js"],
+    "reason": "Reference data change. A human must verify it against the published CREST settlement calendar before approving."
+  },
+  "llm": {
+    "maxCalls": 20,
+    "redactSecretsBeforeSending": true
+  },
+  "rules": [
+    { "id": "POL-01", "when": "A secret or live credential is found in source", "outcome": "BLOCK_RELEASE", "action": "No auto-fix. A human rotates the credential and moves it to a vault." },
+    { "id": "POL-02", "when": "A fix touches a protected path (tests, spec, oracle, policy, factory, config)", "outcome": "HALT_SHIFT", "action": "Patch discarded, shift halted, evidence kept for review." },
+    { "id": "POL-03", "when": "A fix changes reference data", "outcome": "REFERENCE_CHECK_REQUIRED", "action": "Sign-off must state the reference source checked." },
+    { "id": "POL-04", "when": "A fix is outside allowed paths or over size limits", "outcome": "REJECT_PATCH", "action": "Patch rejected; Fix Agent may retry within its attempt budget." },
+    { "id": "POL-05", "when": "Any fix passes verification", "outcome": "HUMAN_SIGN_OFF", "action": "Nothing merges automatically. Every PR waits for the morning review." },
+    { "id": "POL-06", "when": "Spec, oracle, policy or factory files change during a shift, or the evidence ledger fails verification", "outcome": "HALT_SHIFT", "action": "Shift halted; results not trusted." },
+    { "id": "POL-07", "when": "A test result comes from an AI-generated oracle (exploratory probe)", "outcome": "HUMAN_TRIAGE", "action": "Reported, never routed to the Fix Agent." }
+  ]
+}
